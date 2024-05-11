@@ -44,11 +44,11 @@ Digit::Digit(byte value, uint16_t xo, uint16_t yo, uint16_t color) {
   _color = color;
 }
 
-void Digit::setID(uint16_t id){
-  _id=id;
+void Digit::setID(uint16_t id) {
+  _id = id;
 }
 
-uint16_t Digit::getID(){
+uint16_t Digit::getID() {
   return _id;
 }
 
@@ -61,11 +61,11 @@ void Digit::setSize(int sz) {
   segHeight = sz;
 }
 
-void Digit::setX(uint16_t x){
+void Digit::setX(uint16_t x) {
   xOffset = x;
 }
 
-void Digit::setY(uint16_t y){
+void Digit::setY(uint16_t y) {
   yOffset = y;
 }
 
@@ -94,14 +94,14 @@ void Digit::drawLine(uint16_t x, uint16_t y, uint16_t x2, uint16_t y2, uint16_t 
 
 void Digit::drawFillRect(uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint16_t c)
 {
-  _display->fillRect(xOffset + x, height - (y + yOffset), w,h, c);
+  _display->fillRect(xOffset + x, height - (y + yOffset), w, h, c);
 }
 
 void Digit::setColonLeft(bool b) {
-  colonLeft = b;  
+  colonLeft = b;
 }
 
-void Digit::setColor(uint16_t color){
+void Digit::setColor(uint16_t color) {
   _color = color;
 }
 
@@ -113,11 +113,11 @@ void Digit::DrawColon(uint16_t c)
 {
   // Colon is drawn to the left of this digit
   if (colonLeft) {
-    drawFillRect(-3, segHeight-1, 2, 2, c);
-    drawFillRect(-3, segHeight+1+3, 2, 2, c);
+    drawFillRect(-3, segHeight - 1, 2, 2, c);
+    drawFillRect(-3, segHeight + 1 + 3, 2, 2, c);
   } else {
-    drawFillRect(+1 + segWidth + 2, segHeight-1, 2, 2, c);
-    drawFillRect(+1 + segWidth + 2, segHeight+1+3, 2, 2, c);    
+    drawFillRect(+1 + segWidth + 2, segHeight - 1, 2, 2, c);
+    drawFillRect(+1 + segWidth + 2, segHeight + 1 + 3, 2, 2, c);
   }
 }
 
@@ -275,33 +275,33 @@ void Digit::Morph0() {
   // ZERO
   for (int i = 0; i <= segWidth; i++)
   {
-    if (_value==1) { // If 1 to 0, slide B to F and E to C  
-      // slide B to F 
-      drawLine(segWidth - i, segHeight * 2+1 , segWidth - i, segHeight + 2, _color);
-      if (i > 0) drawLine(segWidth - i + 1, segHeight * 2+1, segWidth - i + 1, segHeight + 2, black);
+    if (_value == 1) { // If 1 to 0, slide B to F and E to C
+      // slide B to F
+      drawLine(segWidth - i, segHeight * 2 + 1 , segWidth - i, segHeight + 2, _color);
+      if (i > 0) drawLine(segWidth - i + 1, segHeight * 2 + 1, segWidth - i + 1, segHeight + 2, black);
 
       // slide E to C
       drawLine(segWidth - i, 1, segWidth - i, segHeight, _color);
       if (i > 0) drawLine(segWidth - i + 1, 1, segWidth - i + 1, segHeight, black);
 
-      if (i<segWidth) drawPixel(segWidth - i, segHeight * 2 + 2 , _color); // Draw A
-      if (i<segWidth) drawPixel(segWidth - i, 0, _color); // Draw D
-    }
-    
-    if (_value==2) { // If 2 to 0, slide B to F and Flow G to C
-      // slide B to F 
-      drawLine(segWidth - i, segHeight * 2+1 , segWidth - i, segHeight + 2, _color);
-      if (i > 0) drawLine(segWidth - i + 1, segHeight * 2+1, segWidth - i + 1, segHeight + 2, black);
-    
-      drawPixel(1+i, segHeight + 1, black); // Erase G left to right
-      if (i<segWidth) drawPixel(segWidth + 1, segHeight + 1- i, _color);// Draw C
+      if (i < segWidth) drawPixel(segWidth - i, segHeight * 2 + 2 , _color); // Draw A
+      if (i < segWidth) drawPixel(segWidth - i, 0, _color); // Draw D
     }
 
-    if (_value==3) { // B to F, C to E
-      // slide B to F 
-      drawLine(segWidth - i, segHeight * 2+1 , segWidth - i, segHeight + 2, _color);
-      if (i > 0) drawLine(segWidth - i + 1, segHeight * 2+1, segWidth - i + 1, segHeight + 2, black);
-      
+    if (_value == 2) { // If 2 to 0, slide B to F and Flow G to C
+      // slide B to F
+      drawLine(segWidth - i, segHeight * 2 + 1 , segWidth - i, segHeight + 2, _color);
+      if (i > 0) drawLine(segWidth - i + 1, segHeight * 2 + 1, segWidth - i + 1, segHeight + 2, black);
+
+      drawPixel(1 + i, segHeight + 1, black); // Erase G left to right
+      if (i < segWidth) drawPixel(segWidth + 1, segHeight + 1 - i, _color); // Draw C
+    }
+
+    if (_value == 3) { // B to F, C to E
+      // slide B to F
+      drawLine(segWidth - i, segHeight * 2 + 1 , segWidth - i, segHeight + 2, _color);
+      if (i > 0) drawLine(segWidth - i + 1, segHeight * 2 + 1, segWidth - i + 1, segHeight + 2, black);
+
       // Move C to E
       drawLine(segWidth - i, 1, segWidth - i, segHeight, _color);
       if (i > 0) drawLine(segWidth - i + 1, 1, segWidth - i + 1, segHeight, black);
@@ -309,17 +309,17 @@ void Digit::Morph0() {
       // Erase G from right to left
       drawPixel(segWidth - i, segHeight + 1, black); // G
     }
-    
-    if (_value==5) { // If 5 to 0, we also need to slide F to B
-      if (i<segWidth) {
-        if (i>0) drawLine(1 + i, segHeight * 2 + 1, 1 + i, segHeight + 2, black);
+
+    if (_value == 5) { // If 5 to 0, we also need to slide F to B
+      if (i < segWidth) {
+        if (i > 0) drawLine(1 + i, segHeight * 2 + 1, 1 + i, segHeight + 2, black);
         drawLine(2 + i, segHeight * 2 + 1, 2 + i, segHeight + 2, _color);
       }
     }
-    
-    if (_value==5 || _value==9) { // If 9 or 5 to 0, Flow G into E
-      if (i<segWidth) drawPixel(segWidth - i, segHeight + 1, black);
-      if (i<segWidth) drawPixel(0, segHeight - i, _color);
+
+    if (_value == 5 || _value == 9) { // If 9 or 5 to 0, Flow G into E
+      if (i < segWidth) drawPixel(segWidth - i, segHeight + 1, black);
+      if (i < segWidth) drawPixel(0, segHeight - i, _color);
     }
     delay(animSpeed);
   }
@@ -361,4 +361,3 @@ void Digit::Morph(byte newValue) {
   }
   _value = newValue;
 }
-

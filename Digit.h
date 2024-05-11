@@ -7,7 +7,7 @@
 //#include <PxMatrix.h> // https://github.com/2dom/PxMatrix
 
 class Digit {
-  
+
   public:
     Digit(byte value, uint16_t xo, uint16_t yo, uint16_t color);
     void Draw(byte value);
@@ -37,7 +37,7 @@ class Digit {
     int segHeight = 6;
     int segWidth = segHeight;
     bool colonLeft = true;
-    
+
     void drawPixel(uint16_t x, uint16_t y, uint16_t c);
     void drawFillRect(uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint16_t c);
     void drawLine(uint16_t x, uint16_t y, uint16_t x2, uint16_t y2, uint16_t c);

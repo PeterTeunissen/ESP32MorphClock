@@ -1,10 +1,10 @@
 /*
-remix from HarryFun's great Morphing Digital Clock idea https://github.com/hwiguna/HariFun_166_Morphing_Clock
-follow the great tutorial there and eventually use this code as alternative
+  remix from HarryFun's great Morphing Digital Clock idea https://github.com/hwiguna/HariFun_166_Morphing_Clock
+  follow the great tutorial there and eventually use this code as alternative
 
-provided 'AS IS', use at your own risk
- * mirel.t.lazar@gmail.com
- */
+  provided 'AS IS', use at your own risk
+   mirel.t.lazar@gmail.com
+*/
 
 #include <ESP32-HUB75-MatrixPanel-I2S-DMA.h>
 #include <WiFi.h>
@@ -33,7 +33,7 @@ const char OCTOBER[]  = "OCT";
 const char NOVEMBER[]  = "NOV";
 const char DECEMBER[]  = "DEC";
 
-const char *const month_table[]  = {JANUARY,FEBRUARY,MARCH,APRIL,MAY,JUNE,JULY,AUGUST,SEPTEMBER,OCTOBER,NOVEMBER,DECEMBER};
+const char *const month_table[]  = {JANUARY, FEBRUARY, MARCH, APRIL, MAY, JUNE, JULY, AUGUST, SEPTEMBER, OCTOBER, NOVEMBER, DECEMBER};
 
 struct DisplayColors {
   uint16_t white_digits;
@@ -43,7 +43,9 @@ struct DisplayColors {
   uint16_t green;
 };
 
-const int oneWireBus = 32;     
+const int buttonPin = 33;
+const int oneWireBus = 32;
+
 OneWire oneWire(oneWireBus);
 DallasTemperature sensors(&oneWire);
 
@@ -66,7 +68,7 @@ void saveConfigCallback() {
 #define PANEL_RES_X 64
 #define PANEL_RES_Y 32
 #define PANEL_CHAIN 1
-    
+
 MatrixPanel_I2S_DMA *display = nullptr;
 
 //=== SEGMENTS ===
@@ -76,18 +78,18 @@ DisplayColors lowColors;
 DisplayColors highColors;
 DisplayColors *currentColors;
 
-Digit digit0(0, 63 - 1 - 9*1, 8, display->color565(highIntensity, highIntensity, highIntensity));
-Digit digit1(0, 63 - 1 - 9*2, 8, display->color565(highIntensity, highIntensity, highIntensity));
-Digit digit2(0, 63 - 4 - 9*3, 8, display->color565(highIntensity, highIntensity, highIntensity));
-Digit digit3(0, 63 - 4 - 9*4, 8, display->color565(highIntensity, highIntensity, highIntensity));
-Digit digit4(0, 63 - 7 - 9*5, 8, display->color565(highIntensity, highIntensity, highIntensity));
-Digit digit5(0, 63 - 7 - 9*6, 8, display->color565(highIntensity, highIntensity, highIntensity));
+Digit digit0(0, 63 - 1 - 9 * 1, 8, display->color565(highIntensity, highIntensity, highIntensity));
+Digit digit1(0, 63 - 1 - 9 * 2, 8, display->color565(highIntensity, highIntensity, highIntensity));
+Digit digit2(0, 63 - 4 - 9 * 3, 8, display->color565(highIntensity, highIntensity, highIntensity));
+Digit digit3(0, 63 - 4 - 9 * 4, 8, display->color565(highIntensity, highIntensity, highIntensity));
+Digit digit4(0, 63 - 7 - 9 * 5, 8, display->color565(highIntensity, highIntensity, highIntensity));
+Digit digit5(0, 63 - 7 - 9 * 6, 8, display->color565(highIntensity, highIntensity, highIntensity));
 
 void getWeather();
 
 int oldTemp;
 int newTemp;
-char readMode= ' ';
+char readMode = ' ';
 char timezone[50] = "EST5EDT,M3.2.0,M11.1.0";
 char military[2] = "N";     // 24 hour mode? Y/N
 char u_metric[2] = "N";     // use metric for units? Y/N
@@ -130,14 +132,14 @@ int month() {
   if (!getLocalTime(&timeInfo)) {
     Serial.println("Error getting local time.");
   }
-  return timeInfo.tm_mon+1;
+  return timeInfo.tm_mon + 1;
 }
 
 int year() {
   if (!getLocalTime(&timeInfo)) {
     Serial.println("Error getting local time.");
   }
-  return timeInfo.tm_year+1900;
+  return timeInfo.tm_year + 1900;
 }
 
 bool isAM() {
@@ -145,7 +147,7 @@ bool isAM() {
 }
 
 bool isPM() {
-  return hour()>=12;
+  return hour() >= 12;
 }
 
 int hourFormat12() {
@@ -172,7 +174,7 @@ bool loadConfig() {
   if (!SPIFFS.begin(true)) {
     Serial.println(F("Error starting SPIIFS. Lets format it and try again."));
     return false;
-  } 
+  }
   Serial.println(F("Error starting SPIIFS. Lets format it and try again."));
   File configFile = SPIFFS.open("/config.json");
   if (!configFile) {
@@ -188,11 +190,11 @@ bool loadConfig() {
     Serial.println("Parsing JSON");
 
     strcpy(timezone, json["timezone"]);
-    strcpy(military,json["military"]);
-    strcpy(u_metric,json["metric"]);;
-    strcpy(date_fmt,json["date-format"]);
-    strcpy(api_key,json["api-key"]);
-    strcpy(city_code,json["city-code"]);
+    strcpy(military, json["military"]);
+    strcpy(u_metric, json["metric"]);;
+    strcpy(date_fmt, json["date-format"]);
+    strcpy(api_key, json["api-key"]);
+    strcpy(city_code, json["city-code"]);
 
     return true;
   } else {
@@ -215,8 +217,8 @@ void saveConfig() {
     Serial.println(F("Error open SPIFFS config for w"));
   } else {
     Serial.println ("Saving configuration to file:");
-    serializeJsonPretty(json,Serial);
-    if (serializeJson(json,configFile)==0){
+    serializeJsonPretty(json, Serial);
+    if (serializeJson(json, configFile) == 0) {
       Serial.println ("Error saving configuration to file");
     }
     configFile.close();
@@ -227,17 +229,17 @@ void configModeCallback(WiFiManager *myWiFiManager)
 // Called when config mode launched
 {
   Serial.println("Entered Configuration Mode");
- 
+
   Serial.print("Config SSID: ");
   Serial.println(myWiFiManager->getConfigPortalSSID());
- 
+
   Serial.print("Config IP Address: ");
   Serial.println(WiFi.softAPIP());
 }
 
-const byte row0 = 2+0*10;
-const byte row1 = 2+1*10;
-const byte row2 = 2+2*10;
+const byte row0 = 2 + 0 * 10;
+const byte row1 = 2 + 1 * 10;
+const byte row2 = 2 + 2 * 10;
 void wifi_setup() {
 
   //-- Config --
@@ -253,36 +255,47 @@ void wifi_setup() {
   wifiManager.setSaveConfigCallback(saveConfigCallback);
   wifiManager.setAPCallback(configModeCallback);
 
-  WiFiManagerParameter timeZoneParameter("timeZone", "Timezone (Posix format)", timezone, 50); 
+  WiFiManagerParameter timeZoneParameter("timeZone", "Timezone (Posix format)", timezone, 50);
   wifiManager.addParameter(&timeZoneParameter);
-  WiFiManagerParameter militaryParameter("military", "24Hr (Y/N)", military, 1); 
+  WiFiManagerParameter militaryParameter("military", "24Hr (Y/N)", military, 1);
   wifiManager.addParameter(&militaryParameter);
-  WiFiManagerParameter metricParameter("metric", "Metric (Y/N)", u_metric, 1); 
+  WiFiManagerParameter metricParameter("metric", "Metric (Y/N)", u_metric, 1);
   wifiManager.addParameter(&metricParameter);
-  WiFiManagerParameter dmydateParameter("date_fmt", "DateFormat (D.M.Y)", date_fmt, 6); 
+  WiFiManagerParameter dmydateParameter("date_fmt", "DateFormat (D.M.Y)", date_fmt, 6);
   wifiManager.addParameter(&dmydateParameter);
-  WiFiManagerParameter apiKeyParameter("api_key", "openweather API Key", api_key, 20); 
+  WiFiManagerParameter apiKeyParameter("api_key", "openweather API Key", api_key, 20);
   wifiManager.addParameter(&apiKeyParameter);
-  WiFiManagerParameter cityParameter("city", "openweather City code", city_code, 30); 
+  WiFiManagerParameter cityParameter("city", "openweather City code", city_code, 30);
   wifiManager.addParameter(&cityParameter);
- 
-  int v=512;
-  if (v<128) {
-    TFDrawText(display, wifiManagerAPName, 0, 1, display->color565(0, 0, 255));
-    TFDrawText(display, wifiManagerAPPassword, 0, 10, display->color565(0, 0, 255));
 
-    wifiManager.startConfigPortal(wifiManagerAPName, wifiManagerAPPassword);
+  if (digitalRead(buttonPin) == LOW) {
+    // poor mans debounce/press-hold, code not ideal for production
+    delay(50);
+    if (digitalRead(buttonPin) == LOW ) {
+
+      delay(3000); // to fully reset delay hold button for 3 sec
+      if (digitalRead(buttonPin) == LOW ) {
+        Serial.println("Button still Held. Erasing Config, restarting");
+        wifiManager.resetSettings();
+        ESP.restart();
+      }
+
+      TFDrawText(display, wifiManagerAPName, 0, 1, display->color565(0, 0, 255));
+      TFDrawText(display, wifiManagerAPPassword, 0, 10, display->color565(0, 0, 255));
+
+      wifiManager.startConfigPortal(wifiManagerAPName, wifiManagerAPPassword);
+    }
   } else {
     Serial.println(F("Normal mode"));
 
     TFDrawText(display, String("   CONNECTING   "), 0, 13, display->color565(0, 0, 255));
 
-  //fetches ssid and pass from eeprom and tries to connect
-  //if it does not connect it starts an access point with the specified name wifiManagerAPName
-  //and goes into a blocking loop awaiting configuration
-   wifiManager.autoConnect(wifiManagerAPName);
- }
-  
+    //fetches ssid and pass from eeprom and tries to connect
+    //if it does not connect it starts an access point with the specified name wifiManagerAPName
+    //and goes into a blocking loop awaiting configuration
+    wifiManager.autoConnect(wifiManagerAPName);
+  }
+
   Serial.print(F("timezone="));
   Serial.println(timezone);
   Serial.print(F("military="));
@@ -295,7 +308,7 @@ void wifi_setup() {
   Serial.println(city_code);
   Serial.print(F("apikey="));
   Serial.println(api_key);
-  
+
   //timezone
   strcpy(timezone, timeZoneParameter.getValue());
   //military time
@@ -324,7 +337,7 @@ void wifi_setup() {
   NTP.setNTPTimeout(2000);
   // NTP.setMinSyncAccuracy (5000);
   // NTP.settimeSyncThreshold (3000);
-  NTP.begin("pool.ntp.org");  
+  NTP.begin("pool.ntp.org");
   NTP.setTimeZone(timezone);
 
   Serial.print("TimeZone:");
@@ -333,7 +346,7 @@ void wifi_setup() {
   if (shouldSaveConfig) {
     saveConfig();
   }
-  
+
   getWeather();
 }
 
@@ -344,9 +357,9 @@ byte ss;
 byte firstDraw = 1;
 byte ntpsynced = 0;
 NTPEvent_t ntp_event;
-byte ntpSyncReceived=0;
-//
-void setup() {	
+byte ntpSyncReceived = 0;
+
+void setup() {
 
   Serial.begin(115200);
 
@@ -376,32 +389,34 @@ void setup() {
   digit5.setPanel(display);
   digit5.setID(5);
 
-  lowColors.white_digits=display->color565(lowIntensity, lowIntensity, lowIntensity);
-  lowColors.white_temps=display->color565(lowIntensity, lowIntensity, lowIntensity);
-  lowColors.red=display->color565(lowIntensity, 0, 0);
-  lowColors.green=display->color565(0, lowIntensity, 0);
-  lowColors.blue=display->color565(0, 0, lowIntensity);
+  lowColors.white_digits = display->color565(lowIntensity, lowIntensity, lowIntensity);
+  lowColors.white_temps = display->color565(lowIntensity, lowIntensity, lowIntensity);
+  lowColors.red = display->color565(lowIntensity, 0, 0);
+  lowColors.green = display->color565(0, lowIntensity, 0);
+  lowColors.blue = display->color565(0, 0, lowIntensity);
 
-  highColors.white_digits=display->color565(highIntensity, highIntensity, highIntensity);
-  highColors.white_temps=display->color565(lowIntensity, lowIntensity, lowIntensity);
-  highColors.red=display->color565(highIntensity, 0, 0);
-  highColors.green=display->color565(0, highIntensity, 0);
-  highColors.blue=display->color565(0, 0, highIntensity);
+  highColors.white_digits = display->color565(highIntensity, highIntensity, highIntensity);
+  highColors.white_temps = display->color565(lowIntensity, lowIntensity, lowIntensity);
+  highColors.red = display->color565(highIntensity, 0, 0);
+  highColors.green = display->color565(0, highIntensity, 0);
+  highColors.blue = display->color565(0, 0, highIntensity);
 
   currentColors = &highColors;
-  
+
   TFDrawText(display, String("     STARTING     "), 0, 13, highColors.blue);
+
+  pinMode(buttonPin, INPUT_PULLUP);
 
   wifi_setup ();
 
   NTP.onNTPSyncEvent ([] (NTPEvent_t event) {
     ntpsynced = 1;
     ntp_event = event;
-    ntpSyncReceived=1;
+    ntpSyncReceived = 1;
   });
 
   //prep screen for clock display
-  
+
   display->fillScreen(0);
 
   Serial.print("highColors.white_digits=");
@@ -447,9 +462,9 @@ void setup() {
   sensors.begin();
 }
 
-//open weather map api key 
+//open weather map api key
 String apiKey = "aec6c8810510cce7b0ee8deca174c79a"; //e.g a hex string like "abcdef0123456789abcdef0123456789"
-//the city you want the weather for 
+//the city you want the weather for
 String location = "Phoenixville,US"; //e.g. "Paris,FR"
 char server[] = "api.openweathermap.org";
 WiFiClient client;
@@ -464,8 +479,8 @@ String condS = "";
 void getWeather() {
   errColor = 0;
   if (!apiKey.length()) {
-    Serial.println(F("No API KEY for weather")); 
-    errColor = currentColors->red; 
+    Serial.println(F("No API KEY for weather"));
+    errColor = currentColors->red;
     return;
   }
   String serverPath = "http://api.openweathermap.org/data/2.5/weather?q=" + location + "&APPID=" + apiKey + "&cnt=1&units=";//
@@ -474,14 +489,14 @@ void getWeather() {
   } else {
     serverPath = serverPath + "imperial";
   }
-  
-  Serial.print(F("i:conn to weather URL:")); 
-  Serial.println(serverPath);
-  // if you get a connection, report back via serial: 
 
-  http.begin(client,serverPath);
+  Serial.print(F("i:conn to weather URL:"));
+  Serial.println(serverPath);
+  // if you get a connection, report back via serial:
+
+  http.begin(client, serverPath);
   int httpResult = http.GET();
-  if (httpResult<=0) {
+  if (httpResult <= 0) {
     Serial.print("Weather API error:");
     Serial.println(httpResult);
   } else {
@@ -493,9 +508,9 @@ void getWeather() {
     http.end();
     if (!line.length()) {
       Serial.println(F("w:fail weather"));
-      errColor = currentColors->red; 
+      errColor = currentColors->red;
     } else {
-      Serial.print(F("Raw weather output:")); 
+      Serial.print(F("Raw weather output:"));
       Serial.println(line);
 
       StaticJsonDocument<1000> json;
@@ -577,18 +592,18 @@ int xo = 1;
 int yo = 26;
 
 void draw_weather() {
-  if (haveWeather==false) {
+  if (haveWeather == false) {
     getWeather();
   }
 
   uint16_t cc_dgr = display->color565(30, 30, 30);
-//  Serial.println(F("showing the weather"));
-  xo = 0; 
+  //  Serial.println(F("showing the weather"));
+  xo = 0;
   yo = 1;
   TFDrawText(display, String("                "), xo, yo, cc_dgr);
   if (tempM == -10000 || humiM == -10000 || presM == -10000) {
     //TFDrawText (&display, String("NO WEATHER DATA"), xo, yo, cc_dgr);
-//    Serial.println(F("!no weather data available"));
+    //    Serial.println(F("!no weather data available"));
   } else {
     //weather below the clock
     //-temperature
@@ -617,7 +632,7 @@ void draw_weather() {
       }
     }
     //
-    String lstr = String(newTemp) + String((*u_metric=='Y')?"C":"F");
+    String lstr = String(newTemp) + String((*u_metric == 'Y') ? "C" : "F");
     Serial.print(F("tempI:"));
     Serial.println(lstr);
     TFDrawText(display, lstr, xo, yo, lcc);
@@ -647,15 +662,15 @@ void draw_weather() {
       }
     }
 
-    xo=TF_COLS*lstr.length();
+    xo = TF_COLS * lstr.length();
     TFDrawText(display, String("/"), xo, yo, currentColors->green);
 
-    xo+=TF_COLS;
-    lstr = String(tempM) + String((*u_metric=='Y')?"C":"F");
+    xo += TF_COLS;
+    lstr = String(tempM) + String((*u_metric == 'Y') ? "C" : "F");
     Serial.print(F("tempO:"));
     Serial.println(lstr);
     TFDrawText(display, lstr, xo, yo, lcc);
-    
+
     //weather conditions
     //-humidity
     lcc = currentColors->red;
@@ -669,20 +684,20 @@ void draw_weather() {
       lcc = currentColors->white_digits;
     }
     lstr = String (humiM) + "%";
-    xo = 8*TF_COLS;
+    xo = 8 * TF_COLS;
     TFDrawText(display, lstr, xo, yo, lcc);
 
     //-pressure
     lstr = String(presM);
-    if (lstr.length()<4) {
+    if (lstr.length() < 4) {
       lstr = " " + lstr;
     }
-    xo = 12*TF_COLS;
+    xo = 12 * TF_COLS;
     TFDrawText(display, lstr, xo, yo, currentColors->green);
-    
+
     //draw temp min
     if (tempMin > -10000) {
-      xo = 0*TF_COLS; 
+      xo = 0 * TF_COLS;
       yo = 27;
       TFDrawText(display, "   ", xo, yo, 0);
       lstr = String(tempMin);// + String((*u_metric=='Y')?"C":"F");
@@ -696,18 +711,18 @@ void draw_weather() {
       Serial.println(lstr);
       TFDrawText(display, lstr, xo, yo, ct);
     }
-    
+
     //draw temp max
     if (tempMax > -10000) {
-      TFDrawText(display, "   ", 13*TF_COLS, yo, 0);
+      TFDrawText(display, "   ", 13 * TF_COLS, yo, 0);
       //move the text to the right or left as needed
-      xo = 14*TF_COLS; 
+      xo = 14 * TF_COLS;
       yo = 27;
       if (tempMax < 10) {
-        xo = 15*TF_COLS;
+        xo = 15 * TF_COLS;
       }
       if (tempMax > 99) {
-        xo = 13*TF_COLS;
+        xo = 13 * TF_COLS;
       }
       lstr = String (tempMax);// + String((*u_metric=='Y')?"C":"F");
       //blue if negative
@@ -728,60 +743,60 @@ void draw_date() {
 
   Serial.println(F("showing the date"));
   //for (int i = 0 ; i < 12; i++)
-    //TFDrawChar (&display, '0' + i%10, xo + i * 5, yo, display->color565 (0, 255, 0));
+  //TFDrawChar (&display, '0' + i%10, xo + i * 5, yo, display->color565 (0, 255, 0));
   //date below the clock
   char mnth[5];
   byte m = month();
   Serial.print("Month()=");
   Serial.println(m);
-  strcpy(mnth, month_table[month()-1]);
+  strcpy(mnth, month_table[month() - 1]);
   String lstr = String(mnth) + "-" + String(day());
   Serial.print("Month:");
   Serial.println(lstr);
 
-//  for (int i = 0; i < 5; i += 2) {
-//    switch (date_fmt[i]) {
-//      case 'D':
-//        lstr += (day(tnow) < 10 ? "0" + String(day(tnow)) : String(day(tnow)));
-//        if (i < 4)
-//          lstr += date_fmt[i + 1];
-//        break;
-//      case 'M':
-//        lstr += (month(tnow) < 10 ? "0" + String(month(tnow)) : String(month(tnow)));
-//        if (i < 4)
-//          lstr += date_fmt[i + 1];
-//        break;
-//      case 'Y':
-//        lstr += String(year(tnow));
-//        if (i < 4)
-//          lstr += date_fmt[i + 1];
-//        break;
-//    }
-//  }
+  //  for (int i = 0; i < 5; i += 2) {
+  //    switch (date_fmt[i]) {
+  //      case 'D':
+  //        lstr += (day(tnow) < 10 ? "0" + String(day(tnow)) : String(day(tnow)));
+  //        if (i < 4)
+  //          lstr += date_fmt[i + 1];
+  //        break;
+  //      case 'M':
+  //        lstr += (month(tnow) < 10 ? "0" + String(month(tnow)) : String(month(tnow)));
+  //        if (i < 4)
+  //          lstr += date_fmt[i + 1];
+  //        break;
+  //      case 'Y':
+  //        lstr += String(year(tnow));
+  //        if (i < 4)
+  //          lstr += date_fmt[i + 1];
+  //        break;
+  //    }
+  //  }
 
-  if (lstr.length()>0) {
-    xo = 5*TF_COLS; 
+  if (lstr.length() > 0) {
+    xo = 5 * TF_COLS;
     yo = 27;
     TFDrawText(display, lstr, xo, yo, currentColors->green);
   }
 }
 
 void processSyncEvent (NTPEvent_t ntpEvent) {
-    Serial.println("processSyncEvent");
-    switch (ntpEvent.event) {
-        case timeSyncd:
-          Serial.print(F("Got NTP time:"));
-          Serial.println(NTP.getTimeDateString(NTP.getLastNTPSync()));
-          ntpsynced = 1;
-          break;
-        case partlySync:
-        case syncNotNeeded:
-        case accuracyError:
-            Serial.printf ("[NTP-event] %s\n", NTP.ntpEvent2str (ntpEvent));
-            break;
-        default:
-            break;
-    }
+  Serial.println("processSyncEvent");
+  switch (ntpEvent.event) {
+    case timeSyncd:
+      Serial.print(F("Got NTP time:"));
+      Serial.println(NTP.getTimeDateString(NTP.getLastNTPSync()));
+      ntpsynced = 1;
+      break;
+    case partlySync:
+    case syncNotNeeded:
+    case accuracyError:
+      Serial.printf ("[NTP-event] %s\n", NTP.ntpEvent2str (ntpEvent));
+      break;
+    default:
+      break;
+  }
 }
 
 void draw_digits() {
@@ -804,7 +819,7 @@ void draw_digits() {
   digit4.Draw(digit4.Value());
   digit5.Draw(digit5.Value());
 
-  display->drawPixel(62,19,errColor);
+  display->drawPixel(62, 19, errColor);
 
   Serial.print("draw_digits with color:");
   Serial.println(currentColors->white_digits);
@@ -816,7 +831,7 @@ byte prevss = 0;
 void loop() {
 
   if (ntpSyncReceived) {
-    ntpSyncReceived=0;
+    ntpSyncReceived = 0;
     processSyncEvent(ntp_event);
   }
 
@@ -824,250 +839,250 @@ void loop() {
   hh24 = hh;
   mm = minute(); //NTP.getMinute ();
   ss = second(); //NTP.getSecond ();
-  
-  if (ntpsynced==0) {
+
+  if (ntpsynced == 0) {
     Serial.println("Exiting loop. Waiting for ntp sync.");
     return;
   }
 
   if ((hh >= 8) && (hh < 20)) {
-    if ((currentColors==&lowColors) || (firstDraw==1)) {
+    if ((currentColors == &lowColors) || (firstDraw == 1)) {
       currentColors = &highColors;
-      if (firstDraw==1) {
+      if (firstDraw == 1) {
         digit0.Draw(ss % 10);
         digit1.Draw(ss / 10);
         digit2.Draw(mm % 10);
         digit3.Draw(mm / 10);
         digit4.Draw(hh % 10);
 
-        if ((military[0] == 'N') && (hh/10==0)) {
-          digit5.hide(); 
+        if ((military[0] == 'N') && (hh / 10 == 0)) {
+          digit5.hide();
         } else {
           digit5.Draw(hh / 10);
         }
       }
       draw_digits();
       draw_weather();
-      draw_date();      
+      draw_date();
     }
   } else {
-    if ((currentColors==&highColors) || (firstDraw==1)) {
+    if ((currentColors == &highColors) || (firstDraw == 1)) {
       currentColors = &lowColors;
-      if (firstDraw==1) {
+      if (firstDraw == 1) {
         digit0.Draw(ss % 10);
         digit1.Draw(ss / 10);
         digit2.Draw(mm % 10);
         digit3.Draw(mm / 10);
         digit4.Draw(hh % 10);
 
-        if ((military[0] == 'N') && (hh/10==0)) {
-          digit5.hide(); 
+        if ((military[0] == 'N') && (hh / 10 == 0)) {
+          digit5.hide();
         } else {
           digit5.Draw(hh / 10);
         }
       }
       draw_digits();
       draw_weather();
-      draw_date();      
+      draw_date();
     }
   }
 
   firstDraw = 0;
 
-//   if (ntpsync) {
+  //   if (ntpsync) {
 
-// //    Serial.print(F("Mm3:"));
-// //    Serial.println(system_get_free_heap_size());
+  // //    Serial.print(F("Mm3:"));
+  // //    Serial.println(system_get_free_heap_size());
 
-//     ntpsync = 0;
-//     //
-//     prevss = ss;
-//     prevmm = mm;
-//     prevhh = hh;
-//     //brightness control: dimmed during the night(25), bright during the day(150)
-// //    if (hh >= 20 && cin == 150) {
-//  //     cin = 25;
-// //      Serial.println(F("night mode brightness"));
-// //    }
-//     if ((hh >= 8) && (hh < 20)) {
-//       display->setBrightness8(255); //0-255
-// //      Serial.println(F("night mode brightness"));
-//     } else {
-//       display->setBrightness8(90); //0-255
-//     }
-//     //during the day, bright
-// //    if (hh >= 8 && hh < 20 && cin == 25) {
-// //      cin = 150;
-// //      Serial.println(F("day mode brightness"));
-// //    }
-//     //we had a sync so draw without morphing
-//     int cc_gry = display->color565(255, 255, 255);
-//     int cc_dgr = display->color565(30, 30, 30);
-//     //dark blue is little visible on a dimmed screen
-//     //int cc_blu = display->color565(0, 0, cin);
-//     int cc_grn = display->color565(0, cin, 0);
-//     int cc_col = cc_gry;
-//     //
-//     //if (cin == 25) {
-//     //  cc_col = cc_dgr;
-//     //}
-//     //reset digits color
-//     digit0.setColor(cc_col);
-//     digit1.setColor(cc_col);
-//     digit2.setColor(cc_col);
-//     digit3.setColor(cc_col);
-//     digit4.setColor(cc_col);
-//     digit5.setColor(cc_col);
-//     digitColor = cc_col;
+  //     ntpsync = 0;
+  //     //
+  //     prevss = ss;
+  //     prevmm = mm;
+  //     prevhh = hh;
+  //     //brightness control: dimmed during the night(25), bright during the day(150)
+  // //    if (hh >= 20 && cin == 150) {
+  //  //     cin = 25;
+  // //      Serial.println(F("night mode brightness"));
+  // //    }
+  //     if ((hh >= 8) && (hh < 20)) {
+  //       display->setBrightness8(255); //0-255
+  // //      Serial.println(F("night mode brightness"));
+  //     } else {
+  //       display->setBrightness8(90); //0-255
+  //     }
+  //     //during the day, bright
+  // //    if (hh >= 8 && hh < 20 && cin == 25) {
+  // //      cin = 150;
+  // //      Serial.println(F("day mode brightness"));
+  // //    }
+  //     //we had a sync so draw without morphing
+  //     int cc_gry = display->color565(255, 255, 255);
+  //     int cc_dgr = display->color565(30, 30, 30);
+  //     //dark blue is little visible on a dimmed screen
+  //     //int cc_blu = display->color565(0, 0, cin);
+  //     int cc_grn = display->color565(0, cin, 0);
+  //     int cc_col = cc_gry;
+  //     //
+  //     //if (cin == 25) {
+  //     //  cc_col = cc_dgr;
+  //     //}
+  //     //reset digits color
+  //     digit0.setColor(cc_col);
+  //     digit1.setColor(cc_col);
+  //     digit2.setColor(cc_col);
+  //     digit3.setColor(cc_col);
+  //     digit4.setColor(cc_col);
+  //     digit5.setColor(cc_col);
+  //     digitColor = cc_col;
 
-//     //clear screen
-//     display->fillScreen(0);
-    
-//     //date and weather
-//     draw_weather();
-//     draw_date();
+  //     //clear screen
+  //     display->fillScreen(0);
 
-//     // Draw semicolon between digits
-//     digit2.DrawColon(cc_col);
-//     digit4.DrawColon(cc_col);
-    
-//     //military time?
-//     if (military[0] == 'N') {
-//       hh = hourFormat12();
-//     }
-//     //
-//     digit0.Draw(ss % 10);
-//     digit1.Draw(ss / 10);
-//     digit2.Draw(mm % 10);
-//     digit3.Draw(mm / 10);
-//     digit4.Draw(hh % 10);
+  //     //date and weather
+  //     draw_weather();
+  //     draw_date();
 
-//     if ((military[0] == 'N') && (hh/10==0)) {
-//       digit5.hide(); 
-//     } else {
-//       digit5.Draw(hh / 10);
-//     }
+  //     // Draw semicolon between digits
+  //     digit2.DrawColon(cc_col);
+  //     digit4.DrawColon(cc_col);
 
-//     if (military[0] == 'N') {
-//       TFDrawChar(display, (isAM()?'A':'P'), 63 - 1 + 3 - 9 * 2, 19, cc_grn);
-//       TFDrawChar(display, 'M', 63 - 1 - 2 - 9 * 1, 19, cc_grn);
-//     }
+  //     //military time?
+  //     if (military[0] == 'N') {
+  //       hh = hourFormat12();
+  //     }
+  //     //
+  //     digit0.Draw(ss % 10);
+  //     digit1.Draw(ss / 10);
+  //     digit2.Draw(mm % 10);
+  //     digit3.Draw(mm / 10);
+  //     digit4.Draw(hh % 10);
 
-//     // Draw the error pixel after a reset
-//     display->drawPixel(62,19,errColor);
+  //     if ((military[0] == 'N') && (hh/10==0)) {
+  //       digit5.hide();
+  //     } else {
+  //       digit5.Draw(hh / 10);
+  //     }
 
-//   } else {
-    
-    //seconds
-    if (ss != prevss) {
-      
-      // Draw the error pixel every second
-      display->drawPixel(62,19,errColor);
+  //     if (military[0] == 'N') {
+  //       TFDrawChar(display, (isAM()?'A':'P'), 63 - 1 + 3 - 9 * 2, 19, cc_grn);
+  //       TFDrawChar(display, 'M', 63 - 1 - 2 - 9 * 1, 19, cc_grn);
+  //     }
 
-//      Serial.print(F("Mm4:"));
-//      Serial.println(system_get_free_heap_size());
+  //     // Draw the error pixel after a reset
+  //     display->drawPixel(62,19,errColor);
 
-      int s0 = ss % 10;
-      int s1 = ss / 10;
-      if (s0 != digit0.Value()) {
-        digit0.Morph(s0);
-      }
-      if (s1 != digit1.Value()) {
-        digit1.Morph(s1);
-      }
-      prevss = ss;
+  //   } else {
 
-      // //Tell slave the temperature unit, every 15 and 45 seconds
-      // if (ss==15 || ss==45) {
-      //   Serial.print(">");
-      //   Serial.print(String((*u_metric=='Y')?"C":"F"));
-      //   Serial.println("<");
-      // }      
+  //seconds
+  if (ss != prevss) {
 
-      //get weather from API every 5mins and 30sec 
-      if (ss == 30 && ((mm % 5) == 0)) {
-        getWeather();
-      }
+    // Draw the error pixel every second
+    display->drawPixel(62, 19, errColor);
+
+    //      Serial.print(F("Mm4:"));
+    //      Serial.println(system_get_free_heap_size());
+
+    int s0 = ss % 10;
+    int s1 = ss / 10;
+    if (s0 != digit0.Value()) {
+      digit0.Morph(s0);
+    }
+    if (s1 != digit1.Value()) {
+      digit1.Morph(s1);
+    }
+    prevss = ss;
+
+    // //Tell slave the temperature unit, every 15 and 45 seconds
+    // if (ss==15 || ss==45) {
+    //   Serial.print(">");
+    //   Serial.print(String((*u_metric=='Y')?"C":"F"));
+    //   Serial.println("<");
+    // }
+
+    //get weather from API every 5mins and 30sec
+    if (ss == 30 && ((mm % 5) == 0)) {
+      getWeather();
+    }
+  }
+
+  //minutes
+  if (mm != prevmm) {
+
+    char str[50];
+    strftime(str, sizeof str, "%x - %I:%M%p", &timeInfo);
+    Serial.println(str);
+
+    sensors.requestTemperatures();
+    if (*u_metric == 'Y') {
+      newTemp = sensors.getTempCByIndex(0);
+      Serial.print(newTemp);
+      Serial.println("ºC");
+    } else {
+      newTemp = sensors.getTempFByIndex(0);
+      Serial.print(newTemp);
+      Serial.println("ºF");
     }
 
-    //minutes
-    if (mm != prevmm) {
+    draw_date();
+    int m0 = mm % 10;
+    int m1 = mm / 10;
+    if (m0 != digit2.Value()) {
+      digit2.Morph (m0);
+    }
+    if (m1 != digit3.Value()) {
+      digit3.Morph (m1);
+    }
+    prevmm = mm;
 
-      char str[50];
-      strftime(str, sizeof str, "%x - %I:%M%p", &timeInfo); 
-      Serial.println(str);
+    // Update weather info on display every minute
+    draw_weather();
+  }
+  //hours
+  if (hh != prevhh) {
+    prevhh = hh;
 
-      sensors.requestTemperatures(); 
-      if (*u_metric == 'Y') {
-        newTemp = sensors.getTempCByIndex(0);
-        Serial.print(newTemp);
-        Serial.println("ºC");
+    // Update the date info on the display only on the full hour
+    draw_date();
+
+    //brightness control: dimmed during the night(25), bright during the day(150)
+    if (hh == 20 || hh == 8) {
+      // ntpsync = 1;
+      //bri change is taken care of due to the sync
+    }
+    //military time?
+    if (military[0] == 'N') {
+      hh = hourFormat12();
+    }
+    //
+    int h0 = hh % 10;
+    int h1 = hh / 10;
+    if (h0 != digit4.Value()) {
+      digit4.Morph(h0);
+    }
+    //if (h1 != digit5.Value ()) digit5.Morph (h1);
+
+    if (military[0] != 'N') {
+      if (h1 != digit5.Value()) {
+        digit5.setColor(currentColors->white_digits);
+        digit5.Morph(h1);
+      }
+    } else {
+      if (h1 == 0) {
+        digit5.hide();
       } else {
-        newTemp = sensors.getTempFByIndex(0);
-        Serial.print(newTemp);
-        Serial.println("ºF");            
-      }
-
-      draw_date();
-      int m0 = mm % 10;
-      int m1 = mm / 10;
-      if (m0 != digit2.Value()) {
-        digit2.Morph (m0);
-      }
-      if (m1 != digit3.Value()) {
-        digit3.Morph (m1);
-      }
-      prevmm = mm;
-	  
-      // Update weather info on display every minute
-      draw_weather();
-    }
-    //hours
-    if (hh != prevhh) {
-      prevhh = hh;
-
-      // Update the date info on the display only on the full hour
-      draw_date();
-
-      //brightness control: dimmed during the night(25), bright during the day(150)
-      if (hh == 20 || hh == 8) {
-        // ntpsync = 1;
-        //bri change is taken care of due to the sync
-      }
-      //military time?
-      if (military[0] == 'N') {
-        hh = hourFormat12();
-      }
-      //
-      int h0 = hh % 10;
-      int h1 = hh / 10;
-      if (h0 != digit4.Value()) {
-        digit4.Morph(h0);
-      }
-      //if (h1 != digit5.Value ()) digit5.Morph (h1);
-
-      if (military[0] != 'N') {
         if (h1 != digit5.Value()) {
           digit5.setColor(currentColors->white_digits);
           digit5.Morph(h1);
         }
-      } else {
-        if (h1 == 0) {
-          digit5.hide();
-        } else {
-          if (h1 != digit5.Value()) {
-            digit5.setColor(currentColors->white_digits);
-            digit5.Morph(h1);
-          }
-        }
       }
+    }
 
-      if (military[0] == 'N') {
-        TFDrawChar(display, (isAM()?'A':'P'), 63 - 1 + 3 - 9 * 2, 19, currentColors->green);
-        TFDrawChar(display, 'M', 63 - 1 - 2 - 9 * 1, 19, currentColors->green);
-      }
-    }//hh changed
-//  }
+    if (military[0] == 'N') {
+      TFDrawChar(display, (isAM() ? 'A' : 'P'), 63 - 1 + 3 - 9 * 2, 19, currentColors->green);
+      TFDrawChar(display, 'M', 63 - 1 - 2 - 9 * 1, 19, currentColors->green);
+    }
+  }//hh changed
+  //  }
   //set NTP sync interval as needed
   if (NTP.getInterval() < 3600 && year() > 1970) {
     //reset the sync interval if we're already in sync
